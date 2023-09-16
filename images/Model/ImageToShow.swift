@@ -65,6 +65,7 @@ final class ImageToShow {
             throw NetworkErrors.onTheTopOfCache
         }
         let uiImage = try await checkRequestWithURL(pictureRequest:previousPicturesRequestArray[previousPictureIndex])
+        authorName = ""
         return uiImage
 
     }

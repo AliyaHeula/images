@@ -10,7 +10,6 @@ import SwiftUI
 struct MainScreenView: View {
     @State var uiImage: UIImage?
     @State var imageToShow = Image(systemName: "figure.mind.and.body")
-    @State var authorName = ""
     let tmp = ImageToShow()
 
     @State private var showingAlert = false
@@ -29,13 +28,15 @@ struct MainScreenView: View {
                         } label: {
                             Image(uiImage: uiImage)
                                 .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 300, height: 300, alignment: .center)
+                                .clipped()
                                 .cornerRadius(16)
-                                .scaledToFit()
-                                .frame(width: 300, height: 300)
-
                         }
-                        if !authorName.isEmpty {
-                            Text("by \(authorName) on Unsplash")
+                        if tmp.authorName != "" {
+                            Text("by \(tmp.authorName) on Unsplash")
+                        } else {
+                            Text("")
                         }
                     }
                 } else {
@@ -86,7 +87,6 @@ struct MainScreenView: View {
             do {
                 uiImage = try await tmp.getPicture()
                 isBackwardDisabled = false
-                authorName = tmp.authorName
                 //                uiImage = try await tmp.testAlerts()
             } catch {
                 switch error {
