@@ -10,6 +10,7 @@ import SwiftUI
 struct MainScreenView: View {
     @State var uiImage: UIImage?
     @State var imageToShow = Image(systemName: "figure.mind.and.body")
+    @State var authorName = ""
     let tmp = ImageToShow()
 
     @State private var showingAlert = false
@@ -32,6 +33,9 @@ struct MainScreenView: View {
                                 .scaledToFit()
                                 .frame(width: 300, height: 300)
 
+                        }
+                        if !authorName.isEmpty {
+                            Text("by \(authorName) on Unsplash")
                         }
                     }
                 } else {
@@ -82,11 +86,12 @@ struct MainScreenView: View {
             do {
                 uiImage = try await tmp.getPicture()
                 isBackwardDisabled = false
+                authorName = tmp.authorName
                 //                uiImage = try await tmp.testAlerts()
             } catch {
                 switch error {
                 case NetworkErrors.limitExceed:
-                    alertText = "Request limit exceeded. Please try again in next hour"
+                    alertText = "Requests limit exceeded. Please try again in the next hour"
                 case NetworkErrors.accessDenied:
                     alertText = "Access is denied"
                 default:

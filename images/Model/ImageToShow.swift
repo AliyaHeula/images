@@ -21,6 +21,8 @@ enum NetworkErrors: Error {
 }
 
 final class ImageToShow {
+    private(set) var authorName = ""
+
     private lazy var image = UIImage()
     private let sessionConfiguration: URLSessionConfiguration
     private let session: URLSession
@@ -88,6 +90,12 @@ final class ImageToShow {
         guard let smallURLString = unsplashPicture.first?.urls.small, let smallURL = URL(string: smallURLString) else {
             print("unavailable string")
             throw NetworkErrors.URLIssue
+        }
+        
+        if let name = unsplashPicture.first?.user.name {
+            authorName = name
+        } else {
+            authorName = ""
         }
 
         print(smallURL)

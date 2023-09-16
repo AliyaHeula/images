@@ -22,7 +22,7 @@ struct UnsplashPicture: Codable {
 //        let currentUserCollections: [String?]
 //        let sponsorship: String?
 //        let topicSubmissions: TopicSubmissions
-//        let user: User
+        let user: User
 //        let exif: Exif
 //        let location: Location
 //        let views, downloads: Int
@@ -84,18 +84,21 @@ struct Urls: Codable {
 
     // MARK: - User
 struct User: Codable {
-        let id: String
-        let updatedAt: Date
-        let username, name, firstName: String
-        let lastName, twitterUsername: String?
-        let portfolioURL: String
-        let bio, location: String
-        let links: UserLinks
-        let profileImage: ProfileImage
-        let instagramUsername: String
-        let totalCollections, totalLikes, totalPhotos: Int
-        let acceptedTos, forHire: Bool
-        let social: Social
+//        let id: String
+//        let updatedAt: Date
+
+    let name: String
+
+//        let username, name, firstName: String
+//        let lastName, twitterUsername: String?
+//        let portfolioURL: String
+//        let bio, location: String
+//        let links: UserLinks
+//        let profileImage: ProfileImage
+//        let instagramUsername: String
+//        let totalCollections, totalLikes, totalPhotos: Int
+//        let acceptedTos, forHire: Bool
+//        let social: Social
     }
 
     // MARK: - UserLinks
