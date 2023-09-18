@@ -6,3 +6,5 @@
 2) получить ключ API
 3) добавить ключ в Config.plist файл
 ![image](https://github.com/AliyaHeula/images/assets/64702824/1798fb5e-8138-4d79-b6b8-2c6a3b47c67b)
+
+В час можно загрузить не более 50 новых картинок.
