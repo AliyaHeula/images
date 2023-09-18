@@ -8,29 +8,22 @@
 import Foundation
 import SwiftUI
 
-enum NetworkErrors: Error {
-    case statusCodeNot200
-    case JSONDecodingError
-    case URLIssue
-    case overallError
-    case cacheIssue
-    case imageDownloadingIssue
-    case limitExceed
-    case onTheTopOfCache
-    case accessDenied
-}
 
-final class ImageToShow {
+
+struct ImageToShow {
+    //MARK: - Properties and initialization
+
     private(set) var authorName = ""
-
-    private lazy var image = UIImage()
+    private(set) var uiImage: UIImage?
+    private(set) var alertText = ""
+    var isPreviousImageInactive: Bool {
+        return previousPictureIndex <= 0
+    }
+    
     private let sessionConfiguration: URLSessionConfiguration
     private let session: URLSession
-
     private let cache = URLCache.shared
-    private var previousPicturesRequestArray = Array<URLRequest>()
-    private var previousPictureIndex = -1
-
+    private let urlRequest: URLRequest
     private var baseURL: URL = {
         URL("https://api.unsplash.com/photos/random/")
     }()
@@ -45,66 +38,73 @@ final class ImageToShow {
                 URLQueryItem(name: "count", value: "1")]
     }()
 
-    let tmp = Bundle.main.infoDictionary
-    private let urlRequest: URLRequest
+    private var previousPicturesRequestArray = Array<(URLRequest, String)>()
+    private var previousPictureIndex = -1
 
     init() {
         sessionConfiguration = URLSessionConfiguration.default
-        sessionConfiguration.timeoutIntervalForRequest = 0
-
+        sessionConfiguration.waitsForConnectivity = true
+        sessionConfiguration.timeoutIntervalForResource = 300
+        
         session = URLSession(configuration: sessionConfiguration)
 
         let fullURL = baseURL.appending(queryItems: queryItems)
         urlRequest = URLRequest(url: fullURL)
     }
 
-    func getPreviousPicture() async throws -> UIImage {
-        previousPictureIndex -= 1
-        if previousPictureIndex == -1 {
-            previousPictureIndex = 0
-            throw NetworkErrors.onTheTopOfCache
-        }
-        let uiImage = try await checkRequestWithURL(pictureRequest:previousPicturesRequestArray[previousPictureIndex])
-        authorName = ""
-        return uiImage
+    //MARK: - Methods
 
+    mutating func getPreviousPicture() async throws {
+        previousPictureIndex = previousPictureIndex == -1 ? 0 : previousPictureIndex - 1
+        uiImage = try await checkRequestWithURL(pictureRequest:previousPicturesRequestArray[previousPictureIndex].0)
+        authorName = previousPicturesRequestArray[previousPictureIndex].1
     }
 
-    func getPicture() async throws -> UIImage {
-        print(urlRequest)
-        let (data, response) = try await session.data(for: urlRequest)
-        guard let response = response as? HTTPURLResponse else {
+    mutating func getNextPicture() async throws {
+        let (data, response): (Data?, URLResponse?) = try await withCheckedThrowingContinuation { continuation in
+            session.dataTask(with: urlRequest) {data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: (data, response))
+                }
+            }.resume()
+        }
+
+        guard let response = response as? HTTPURLResponse,
+              let data = data else {
             throw NetworkErrors.statusCodeNot200
         }
         guard response.statusCode == 200 else {
             print(response)
-            if response.statusCode == 403 {
+            switch response.statusCode {
+            case 403:
+                alertText = "Requests limit exceeded. Please try again in the next hour"
                 throw NetworkErrors.limitExceed
-            } else if response.statusCode == 401 {
+            case 401:
+                alertText = "Access is denied"
                 throw NetworkErrors.accessDenied
+            default:
+                alertText = "Error \(response.statusCode) has appeared"
+                throw NetworkErrors.statusCodeNot200
             }
-            throw NetworkErrors.statusCodeNot200
         }
         guard let unsplashPicture = try? JSONDecoder().decode([UnsplashPicture].self, from: data) else {
             throw NetworkErrors.JSONDecodingError
         }
-        guard let smallURLString = unsplashPicture.first?.urls.small, let smallURL = URL(string: smallURLString) else {
-            print("unavailable string")
+        guard let smallURLString = unsplashPicture.first?.urls.small,
+              let smallURL = URL(string: smallURLString) else {
             throw NetworkErrors.URLIssue
         }
-        
-        if let name = unsplashPicture.first?.user.name {
-            authorName = name
-        } else {
-            authorName = ""
-        }
 
-        print(smallURL)
+        authorName = unsplashPicture.first?.user.name ?? ""
+
         let pictureRequest = URLRequest(url: smallURL)
-        return try await checkRequestWithURL(pictureRequest: pictureRequest)
+        uiImage = try await checkRequestWithURL(pictureRequest: pictureRequest)
+
     }
 
-    func checkRequestWithURL(pictureRequest: URLRequest) async throws -> UIImage {
+    mutating private func checkRequestWithURL(pictureRequest: URLRequest) async throws -> UIImage {
         if cache.cachedResponse(for: pictureRequest) == nil {
             return try await downloadPicture(pictureRequest: pictureRequest)
         } else {
@@ -112,9 +112,10 @@ final class ImageToShow {
         }
     }
 
-    func downloadPicture(pictureRequest: URLRequest) async throws -> UIImage {
+    mutating private func downloadPicture(pictureRequest: URLRequest) async throws -> UIImage {
         let (data, response) = try await session.data(for: pictureRequest)
-        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+        guard let response = response as? HTTPURLResponse,
+              response.statusCode == 200 else {
             throw NetworkErrors.overallError
         }
         guard let uiImage = UIImage(data: data) else {
@@ -122,25 +123,22 @@ final class ImageToShow {
         }
         let cachedImage = CachedURLResponse(response: response, data: data)
         self.cache.storeCachedResponse(cachedImage, for: pictureRequest)
-        
+        let newElement = (pictureRequest, authorName)
         if previousPictureIndex == previousPicturesRequestArray.count - 1 {
-            previousPicturesRequestArray.append(pictureRequest)
+            previousPicturesRequestArray.append(newElement)
         } else {
-            previousPicturesRequestArray = previousPicturesRequestArray[0...previousPictureIndex] + [pictureRequest]
+            previousPicturesRequestArray = previousPicturesRequestArray[0...previousPictureIndex] + [newElement]
         }
         previousPictureIndex += 1
         return uiImage
     }
 
-    func getCachedPicture(pictureRequest: URLRequest) async throws -> UIImage {
-        guard let data = cache.cachedResponse(for: pictureRequest)?.data, let uiImage = UIImage(data: data) else {
+    private func getCachedPicture(pictureRequest: URLRequest) async throws -> UIImage {
+        guard let data = cache.cachedResponse(for: pictureRequest)?.data,
+              let uiImage = UIImage(data: data) else {
             throw NetworkErrors.cacheIssue
         }
         print("taken from Cache")
         return uiImage
-    }
-
-    func testAlerts() async throws -> UIImage {
-        throw NetworkErrors.statusCodeNot200
     }
 }

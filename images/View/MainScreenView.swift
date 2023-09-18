@@ -8,98 +8,71 @@ import Foundation
 import SwiftUI
 
 struct MainScreenView: View {
-    @State var uiImage: UIImage?
-    @State var imageToShow = Image(systemName: "figure.mind.and.body")
-    let tmp = ImageToShow()
+    @ObservedObject var mainScreenViewModel = MainScreenViewModel()
 
-    @State private var showingAlert = false
-    @State private var alertText = ""
-//    "Something went wrong.\nPlease try again later..."
+    @State private var isShowingAlert = false
+    @State private var connectionAlert = false
     @State private var isBackwardDisabled = true
-
+    @State private var isForwardDisabled = false
     
     var body: some View {
-        NavigationStack{
-            VStack {
-                if let uiImage = uiImage {
-                    VStack(alignment: .center) {
-                        NavigationLink{
-                            PictureView(uiImage: uiImage)
-                        } label: {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 300, height: 300, alignment: .center)
-                                .clipped()
-                                .cornerRadius(16)
-                        }
-                        if tmp.authorName != "" {
-                            Text("by \(tmp.authorName) on Unsplash")
-                        } else {
-                            Text("")
-                        }
-                    }
-                } else {
-                    Image(systemName: "photo.artframe")
+        NavigationStack {
+            if let _ = mainScreenViewModel.uiImage {
+                PictureWithText(mainScreenViewModel: mainScreenViewModel)
+            } else {
+                Image(systemName: "photo.artframe")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300, height: 300)
+                    .cornerRadius(16)
+            }
+            HStack {
+                Button(action: previousImages) {
+                    Image(systemName: "chevron.backward.square")
                         .resizable()
-                        .scaledToFit()
-                        .frame(width: 300, height: 300)
-                        .cornerRadius(16)
-                }
-                HStack {
-                    Button(action: cachedImages) {
-                        Image(systemName: "chevron.backward.square")
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .opacity(0.6)
-                    }.disabled(isBackwardDisabled)
-                    Button(action: updateImage) {
-                        Image(systemName: "chevron.forward.square")
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .opacity(0.6)
-                    }.alert(alertText, isPresented: $showingAlert) {}
-                }
+                        .frame(width: 40, height: 40)
+                        .opacity(0.6)
+                }.disabled(isBackwardDisabled)
+                Button(action: nextImage) {
+                    Image(systemName: "chevron.forward.square")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .opacity(0.6)
+                }.alert(mainScreenViewModel.alertText, isPresented: $isShowingAlert) {}
+                    .alert("Conection issue", isPresented: $connectionAlert) {}
+                    .disabled(isForwardDisabled)
             }
         }
     }
 
-    func cachedImages() {
+    func previousImages() {
         Task {
             do {
-                uiImage = try await tmp.getPreviousPicture()
+                try await mainScreenViewModel.getPreviousPicture()
+                isBackwardDisabled = mainScreenViewModel.isPreviousImageInactive
             } catch {
-                switch error {
-                case NetworkErrors.onTheTopOfCache:
-                    isBackwardDisabled = true
-                default:
-                    alertText = "Cache images issue"
-                    showingAlert = true
-                    print(error)
-                }
-            }
-        }
-    }
-
-
-    func updateImage(){
-        Task {
-            do {
-                uiImage = try await tmp.getPicture()
-                isBackwardDisabled = false
-                //                uiImage = try await tmp.testAlerts()
-            } catch {
-                switch error {
-                case NetworkErrors.limitExceed:
-                    alertText = "Requests limit exceeded. Please try again in the next hour"
-                case NetworkErrors.accessDenied:
-                    alertText = "Access is denied"
-                default:
-                    alertText = "Other issues details"
-                }
-                showingAlert = true
+                isShowingAlert = true
                 print(error)
             }
+        }
+    }
+
+    func nextImage(){
+        guard mainScreenViewModel.isConnected else {
+            connectionAlert = true
+            return
+        }
+        connectionAlert = false
+        Task {
+            do {
+                isForwardDisabled = true
+                try await mainScreenViewModel.getNextPicture()
+                isBackwardDisabled = mainScreenViewModel.isPreviousImageInactive
+            } catch {
+                isShowingAlert = true
+                print(error)
+            }
+            isForwardDisabled = false
         }
     }
 }
