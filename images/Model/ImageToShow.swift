@@ -104,7 +104,8 @@ struct ImageToShow {
 
     }
 
-    mutating private func checkRequestWithURL(pictureRequest: URLRequest) async throws -> UIImage {
+
+    private mutating func checkRequestWithURL(pictureRequest: URLRequest) async throws -> UIImage {
         if cache.cachedResponse(for: pictureRequest) == nil {
             return try await downloadPicture(pictureRequest: pictureRequest)
         } else {
@@ -112,7 +113,7 @@ struct ImageToShow {
         }
     }
 
-    mutating private func downloadPicture(pictureRequest: URLRequest) async throws -> UIImage {
+    private mutating func downloadPicture(pictureRequest: URLRequest) async throws -> UIImage {
         let (data, response) = try await session.data(for: pictureRequest)
         guard let response = response as? HTTPURLResponse,
               response.statusCode == 200 else {
@@ -123,6 +124,11 @@ struct ImageToShow {
         }
         let cachedImage = CachedURLResponse(response: response, data: data)
         self.cache.storeCachedResponse(cachedImage, for: pictureRequest)
+        updatePreviousPictureArray(pictureRequest: pictureRequest)
+        return uiImage
+    }
+
+    private mutating func updatePreviousPictureArray(pictureRequest: URLRequest) {
         let newElement = (pictureRequest, authorName)
         if previousPictureIndex == previousPicturesRequestArray.count - 1 {
             previousPicturesRequestArray.append(newElement)
@@ -130,7 +136,6 @@ struct ImageToShow {
             previousPicturesRequestArray = previousPicturesRequestArray[0...previousPictureIndex] + [newElement]
         }
         previousPictureIndex += 1
-        return uiImage
     }
 
     private func getCachedPicture(pictureRequest: URLRequest) async throws -> UIImage {
