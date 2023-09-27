@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4D0CF9C72AB0FEAF007452DF /* UnsplashPicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CF9C62AB0FEAF007452DF /* UnsplashPicture.swift */; };
-		4D0CF9C92AB108B0007452DF /* check in Resources */ = {isa = PBXBuildFile; fileRef = 4D0CF9C82AB108B0007452DF /* check */; };
 		4D0CF9CB2AB10A0C007452DF /* ImageToShow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CF9CA2AB10A0C007452DF /* ImageToShow.swift */; };
 		4D0CF9CD2AB2018B007452DF /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CF9CC2AB2018A007452DF /* NetworkService.swift */; };
 		4D0CF9D02AB22F6B007452DF /* PictureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0CF9CF2AB22F6B007452DF /* PictureView.swift */; };
@@ -23,13 +22,11 @@
 		4DF663D02AB50C4E008F7C2F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DF663CF2AB50C4E008F7C2F /* Assets.xcassets */; };
 		4DF663EF2AB602CE008F7C2F /* NetworkErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF663EE2AB602CE008F7C2F /* NetworkErrors.swift */; };
 		4DF663F12AB79CE0008F7C2F /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF663F02AB79CE0008F7C2F /* NetworkManager.swift */; };
-		4DF663F32AB7CCC0008F7C2F /* LoadingStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF663F22AB7CCC0008F7C2F /* LoadingStatus.swift */; };
 		4DF663F52AB7D11C008F7C2F /* PictureWithText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF663F42AB7D11C008F7C2F /* PictureWithText.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		4D0CF9C62AB0FEAF007452DF /* UnsplashPicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsplashPicture.swift; sourceTree = "<group>"; };
-		4D0CF9C82AB108B0007452DF /* check */ = {isa = PBXFileReference; lastKnownFileType = text; path = check; sourceTree = "<group>"; };
 		4D0CF9CA2AB10A0C007452DF /* ImageToShow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageToShow.swift; sourceTree = "<group>"; };
 		4D0CF9CC2AB2018A007452DF /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		4D0CF9CF2AB22F6B007452DF /* PictureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureView.swift; sourceTree = "<group>"; };
@@ -45,7 +42,6 @@
 		4DF663CF2AB50C4E008F7C2F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4DF663EE2AB602CE008F7C2F /* NetworkErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkErrors.swift; sourceTree = "<group>"; };
 		4DF663F02AB79CE0008F7C2F /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
-		4DF663F22AB7CCC0008F7C2F /* LoadingStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingStatus.swift; sourceTree = "<group>"; };
 		4DF663F42AB7D11C008F7C2F /* PictureWithText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureWithText.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -138,7 +134,6 @@
 				4DF663CC2AB50BE6008F7C2F /* Preview Content */,
 				4DF663CF2AB50C4E008F7C2F /* Assets.xcassets */,
 				4D6F7D0A2AB4F7A700DE5137 /* App */,
-				4D0CF9C82AB108B0007452DF /* check */,
 				4D6F7D032AB4E0C400DE5137 /* Extensions */,
 				4D0CF9C52AB0FD08007452DF /* Model */,
 				4D0CF9CE2AB22F09007452DF /* View */,
@@ -160,7 +155,6 @@
 			isa = PBXGroup;
 			children = (
 				4DF663EE2AB602CE008F7C2F /* NetworkErrors.swift */,
-				4DF663F22AB7CCC0008F7C2F /* LoadingStatus.swift */,
 				4D3A5C262AC46FD400B50FB9 /* ResponseCode.swift */,
 			);
 			path = Enum;
@@ -225,7 +219,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D6F7D092AB4F34700DE5137 /* Config.plist in Resources */,
-				4D0CF9C92AB108B0007452DF /* check in Resources */,
 				4DF663CE2AB50BE6008F7C2F /* Preview Assets.xcassets in Resources */,
 				4DF663D02AB50C4E008F7C2F /* Assets.xcassets in Resources */,
 			);
@@ -251,7 +244,6 @@
 				4D0CF9CD2AB2018B007452DF /* NetworkService.swift in Sources */,
 				4D6F7D052AB4E0D800DE5137 /* URL.swift in Sources */,
 				4DF663EF2AB602CE008F7C2F /* NetworkErrors.swift in Sources */,
-				4DF663F32AB7CCC0008F7C2F /* LoadingStatus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
